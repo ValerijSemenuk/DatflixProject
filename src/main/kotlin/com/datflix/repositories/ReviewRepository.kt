@@ -6,7 +6,7 @@ import com.google.firebase.cloud.FirestoreClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ReviewRepository : Repository<Review, Int> {
+class ReviewRepository : Repository<Review, String> {
 
     private val firestore: Firestore = FirestoreClient.getFirestore()
     private val collection = firestore.collection("reviews")
@@ -15,25 +15,29 @@ class ReviewRepository : Repository<Review, Int> {
         collection.get().get().documents.mapNotNull { it.toObject(Review::class.java) }
     }
 
-    override suspend fun getById(id: Int): Review? = withContext(Dispatchers.IO) {
-        val doc = collection.document(id.toString()).get().get()
+    override suspend fun getById(id: String): Review? = withContext(Dispatchers.IO) {
+        val doc = collection.document(id).get().get()
         if (doc.exists()) doc.toObject(Review::class.java) else null
     }
 
     override suspend fun create(review: Review): Review = withContext(Dispatchers.IO) {
-        collection.document(review.id.toString()).set(review).get()
-        review
+        val docRef = collection.document() // Генеруємо id автоматично
+        val reviewWithId = review.copy(id = docRef.id)
+        docRef.set(reviewWithId).get()
+        reviewWithId
     }
 
     override suspend fun update(review: Review): Boolean = withContext(Dispatchers.IO) {
-        val docRef = collection.document(review.id.toString())
+        val id = review.id ?: return@withContext false
+        val docRef = collection.document(id)
         if (!docRef.get().get().exists()) return@withContext false
         docRef.set(review).get()
         true
     }
 
-    override suspend fun delete(id: Int): Boolean = withContext(Dispatchers.IO) {
-        collection.document(id.toString()).delete().get()
+    override suspend fun delete(id: String): Boolean = withContext(Dispatchers.IO) {
+        collection.document(id).delete().get()
         true
     }
 }
+

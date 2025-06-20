@@ -19,8 +19,8 @@ fun Route.movieRoutes(movieService: MovieService) {
             call.respond(movieService.getAllMovies())
         }
         get("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = call.parameters["id"]
+            if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid or missing id")
                 return@get
             }
@@ -41,8 +41,8 @@ fun Route.movieRoutes(movieService: MovieService) {
             }
         }
         put("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = call.parameters["id"]
+            if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid or missing id")
                 return@put
             }
@@ -59,8 +59,8 @@ fun Route.movieRoutes(movieService: MovieService) {
             }
         }
         delete("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = call.parameters["id"]
+            if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid or missing id")
                 return@delete
             }

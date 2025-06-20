@@ -6,7 +6,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -15,31 +14,30 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:2.3.7")
     implementation("io.ktor:ktor-serialization-gson:2.3.7")
     implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-server-auth:2.3.7")
+    implementation("io.ktor:ktor-server-auth-jwt:2.3.7")
 
-    implementation("com.github.papsign:Ktor-OpenAPI-Generator:-SNAPSHOT")
-
+    // Firebase Admin SDK
+    implementation("com.google.firebase:firebase-admin:9.2.0") // Використовуй одну версію
 
     // Серіалізація
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
-    // Firebase Admin SDK з виключенням listenablefuture
-    implementation("com.google.firebase:firebase-admin:9.1.1") {
-        exclude(group = "com.google.guava", module = "listenablefuture")
-    }
-    implementation("com.google.cloud:google-cloud-firestore:3.13.6") {
-        exclude(group = "com.google.guava", module = "listenablefuture")
-    }
-
     // Логування
     implementation("ch.qos.logback:logback-classic:1.4.11")
 
-    // БД
+    // БД (Exposed, якщо плануєш використовувати)
     implementation("org.jetbrains.exposed:exposed-core:0.44.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.44.0")
+
+    // Тестування (опціонально)
+    testImplementation("io.ktor:ktor-server-tests:2.3.7")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 }
 
 configurations.all {
     resolutionStrategy {
+        // Примусова версія Guava для уникнення конфліктів
         force("com.google.guava:guava:31.1-jre")
     }
 }

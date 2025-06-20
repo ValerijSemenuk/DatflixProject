@@ -1,18 +1,15 @@
 package com.datflix.models
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Movie(
-    val id: Int,
-    val title: String,
-    val description: String,
-    val releaseYear: Int,
-    val durationMinutes: Int,
-    val posterUrl: String,
-    val trailerUrl: String? = null,
-    val genres: List<Int> = emptyList(),  // IDs жанрів
-    val cast: List<Int> = emptyList(),    // IDs акторів
-    val averageRating: Float = 0f,
-    val isTrending: Boolean = false
+    var id: String? = null,
+    var title: String? = null,
+    var description: String? = null,
+    var releaseYear: Int? = null,
+    var durationMinutes: Int? = null,
+    var posterUrl: String? = null,
+    var trailerUrl: String? = null,
+    var genres: List<String> = emptyList(),
+    var cast: List<String> = emptyList(),
+    var averageRating: Float = 0f,
+    var isTrending: Boolean = false
 )

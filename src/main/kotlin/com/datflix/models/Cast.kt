@@ -1,16 +1,12 @@
 package com.datflix.models
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Cast(
-    val id: Int,                // Унікальний ID ролі
-    val actorId: Int,           // Посилання на актора (Actor.id)
-    val movieId: Int,           // Посилання на фільм (Movie.id)
-    val characterName: String,  // Назва ролі ("Тоні Старк")
-    val isMainRole: Boolean,    // Головна роль чи другорядна
-    val orderCredit: Int        // Порядок у титрах (1 = перший)
+    var id: String? = null,
+    var actorId: String? = null,
+    var movieId: String? = null,
+    var characterName: String? = null,
+    var isMainRole: Boolean = false,
+    var orderCredit: Int = 0
 ) {
-    // Додаткові методи
-    fun isLeadRole(): Boolean = orderCredit <= 3  // Перші 3 ролі = головні
+    fun isLeadRole(): Boolean = orderCredit <= 3
 }

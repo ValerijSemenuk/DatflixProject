@@ -1,9 +1,10 @@
-package com.datflix.routes
 
+import com.datflix.firebase.FirebasePrincipal
 import com.datflix.models.User
 import com.datflix.services.UserService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -16,11 +17,22 @@ import io.ktor.server.routing.route
 fun Route.userRoutes(userService: UserService) {
     route("/users") {
         get {
+            // Якщо хочеш, щоб цей маршрут був захищений, можна додати перевірку principal:
+            val principal = call.principal<FirebasePrincipal>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+                return@get
+            }
             call.respond(userService.getAllUsers())
         }
         get("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val principal = call.principal<FirebasePrincipal>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+                return@get
+            }
+            val id = call.parameters["id"]
+            if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid or missing id")
                 return@get
             }
@@ -32,6 +44,11 @@ fun Route.userRoutes(userService: UserService) {
             }
         }
         post {
+            val principal = call.principal<FirebasePrincipal>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+                return@post
+            }
             val user = call.receive<User>()
             try {
                 val created = userService.createUser(user)
@@ -41,8 +58,13 @@ fun Route.userRoutes(userService: UserService) {
             }
         }
         put("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val principal = call.principal<FirebasePrincipal>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+                return@put
+            }
+            val id = call.parameters["id"]
+            if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid or missing id")
                 return@put
             }
@@ -59,8 +81,13 @@ fun Route.userRoutes(userService: UserService) {
             }
         }
         delete("{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val principal = call.principal<FirebasePrincipal>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+                return@delete
+            }
+            val id = call.parameters["id"]
+            if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid or missing id")
                 return@delete
             }

@@ -1,40 +1,56 @@
 package com.datflix
-
-import io.github.papsign.ktor.openapigen.OpenAPIGen
-import io.github.papsign.ktor.openapigen.route.normal.any
-
 import com.datflix.config.configureRouting
 import com.datflix.config.configureSerialization
-import com.google.auth.oauth2.GoogleCredentials
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
+import com.datflix.firebase.configureAuth
+import com.datflix.firebase.configureFirebase
+import com.datflix.repositories.ActorRepository
+import com.datflix.repositories.CastRepository
+import com.datflix.repositories.GenreRepository
+import com.datflix.repositories.MovieRepository
+import com.datflix.repositories.ReviewRepository
+import com.datflix.repositories.UserRepository
+import com.datflix.repositories.WatchlistItemRepository
+import com.datflix.services.ActorService
+import com.datflix.services.CastService
+import com.datflix.services.GenreService
+import com.datflix.services.MovieService
+import com.datflix.services.ReviewService
+import com.datflix.services.UserService
+import com.datflix.services.WatchlistItemService
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import java.io.InputStream
 
 fun main() {
     embeddedServer(
         factory = Netty,
-        port = 8080,
+        port = 8000,
         module = Application::module
     ).start(wait = true)
 }
 
 fun Application.module() {
-    configureFirebase()          // Ініціалізуємо Firebase Admin SDK
-    configureRouting()           // Роути
-    configureSerialization()     // JSON
-}
+    configureFirebase()
+    configureAuth()
+    configureSerialization()
 
-fun Application.configureFirebase() {
-    val serviceAccountStream: InputStream = this::class.java.classLoader
-        .getResourceAsStream("firebase/serviceAccountKey.json")
-        ?: throw IllegalStateException("Firebase service account key not found!")
+    // Ініціалізація сервісів з репозиторіями
+    val actorService = ActorService(ActorRepository())
+    val castService = CastService(CastRepository())
+    val genreService = GenreService(GenreRepository())
+    val movieService = MovieService(MovieRepository())
+    val reviewService = ReviewService(ReviewRepository())
+    val userService = UserService(UserRepository())
+    val watchlistItemService = WatchlistItemService(WatchlistItemRepository())
 
-    val options = FirebaseOptions.builder()
-        .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
-        .build()
-
-    FirebaseApp.initializeApp(options)
+    // Конфігурація маршрутів
+    configureRouting(
+        actorService = actorService,
+        castService = castService,
+        genreService = genreService,
+        movieService = movieService,
+        reviewService = reviewService,
+        userService = userService,
+        watchlistItemService = watchlistItemService
+    )
 }

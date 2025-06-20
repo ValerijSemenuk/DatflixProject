@@ -6,34 +6,39 @@ import com.google.firebase.cloud.FirestoreClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class CastRepository : Repository<Cast, Int> {
+class CastRepository : Repository<Cast, String> {
 
     private val firestore: Firestore = FirestoreClient.getFirestore()
     private val collection = firestore.collection("cast")
 
     override suspend fun getAll(): List<Cast> = withContext(Dispatchers.IO) {
-        collection.get().get().documents.mapNotNull { it.toObject(Cast::class.java) }
+        collection.get().get().documents.mapNotNull { doc ->
+            doc.toObject(Cast::class.java)?.copy(id = doc.id)
+        }
     }
 
-    override suspend fun getById(id: Int): Cast? = withContext(Dispatchers.IO) {
-        val doc = collection.document(id.toString()).get().get()
-        if (doc.exists()) doc.toObject(Cast::class.java) else null
+    override suspend fun getById(id: String): Cast? = withContext(Dispatchers.IO) {
+        val doc = collection.document(id).get().get()
+        if (doc.exists()) doc.toObject(Cast::class.java)?.copy(id = doc.id) else null
     }
 
     override suspend fun create(cast: Cast): Cast = withContext(Dispatchers.IO) {
-        collection.document(cast.id.toString()).set(cast).get()
-        cast
+        val docRef = collection.document()
+        val castWithId = cast.copy(id = docRef.id)
+        docRef.set(castWithId).get()
+        castWithId
     }
 
     override suspend fun update(cast: Cast): Boolean = withContext(Dispatchers.IO) {
-        val docRef = collection.document(cast.id.toString())
+        val id = cast.id ?: return@withContext false
+        val docRef = collection.document(id)
         if (!docRef.get().get().exists()) return@withContext false
         docRef.set(cast).get()
         true
     }
 
-    override suspend fun delete(id: Int): Boolean = withContext(Dispatchers.IO) {
-        collection.document(id.toString()).delete().get()
+    override suspend fun delete(id: String): Boolean = withContext(Dispatchers.IO) {
+        collection.document(id).delete().get()
         true
     }
 }
